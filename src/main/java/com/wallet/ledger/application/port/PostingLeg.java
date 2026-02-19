@@ -15,4 +15,8 @@ public class PostingLeg {
     AccountId accountId;
     EntryDirection direction;
     BigDecimal amount;
+
+    public AccountId getAccountId() { return accountId; }
+    public EntryDirection getDirection() { return direction; }
+    public BigDecimal getAmount() { return amount; }
 }

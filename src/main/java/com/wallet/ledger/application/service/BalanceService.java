@@ -4,7 +4,6 @@ import com.wallet.ledger.application.port.FindAccountPort;
 import com.wallet.ledger.application.port.FindWalletPort;
 import com.wallet.ledger.application.port.LoadAccountBalancesPort;
 import com.wallet.ledger.domain.valueobject.AccountType;
-import com.wallet.ledger.domain.valueobject.WalletId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,15 +20,15 @@ public class BalanceService {
     private final FindAccountPort findAccountPort;
     private final LoadAccountBalancesPort loadAccountBalancesPort;
 
-    public BigDecimal getBalance(WalletId walletId) {
-        log.debug("Balance enquiry walletId={}", walletId.value());
-        findWalletPort.findById(walletId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet not found: " + walletId.value()));
-        var account = findAccountPort.findByWalletIdAndType(walletId, AccountType.USER_WALLET_ACCOUNT)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet account not found: " + walletId.value()));
+    public BigDecimal getBalance(String userId) {
+        log.debug("Balance enquiry userId={}", userId);
+        var wallet = findWalletPort.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found for userId: " + userId));
+        var account = findAccountPort.findByWalletIdAndType(wallet.getWalletId(), AccountType.USER_WALLET_ACCOUNT)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet account not found for userId: " + userId));
         var balances = loadAccountBalancesPort.loadBalances(Set.of(account.getAccountId()));
         BigDecimal balance = balances.getOrDefault(account.getAccountId(), BigDecimal.ZERO);
-        log.trace("Balance walletId={} balance={}", walletId.value(), balance);
+        log.trace("Balance userId={} balance={}", userId, balance);
         return balance;
     }
 }

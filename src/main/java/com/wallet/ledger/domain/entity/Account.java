@@ -21,6 +21,11 @@ public class Account {
     AccountStatus status;
     WalletId walletId;
 
+    public AccountId getAccountId() { return accountId; }
+    public AccountType getAccountType() { return accountType; }
+    public AccountStatus getStatus() { return status; }
+    public WalletId getWalletId() { return walletId; }
+
     public boolean isSystemAccount() {
         return walletId == null;
     }

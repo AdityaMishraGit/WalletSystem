@@ -7,7 +7,8 @@ import com.wallet.ledger.domain.exception.InsufficientBalanceException;
 import com.wallet.ledger.domain.exception.InvalidPostingException;
 import com.wallet.ledger.domain.valueobject.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,11 @@ import java.util.stream.Collectors;
 /**
  * Ledger posting engine. Double-entry: debits = credits; computes balance_after; persists atomically.
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LedgerPostingEngine {
 
+    private static final Logger log = LoggerFactory.getLogger(LedgerPostingEngine.class);
     private static final int AMOUNT_SCALE = 4;
 
     @Value("${ledger.system-accounts.master}")
@@ -54,6 +55,8 @@ public class LedgerPostingEngine {
                 .status(TransactionStatus.COMPLETED)
                 .referenceId(command.getReferenceId())
                 .createdAt(Instant.now())
+                .serviceBundleId(command.getServiceBundleId())
+                .provisioningReference(command.getProvisioningReference())
                 .build();
         List<LedgerEntry> entries = new ArrayList<>();
         Instant now = Instant.now();

@@ -20,6 +20,12 @@ public class Wallet {
     String currency;
     Instant createdAt;
 
+    public WalletId getWalletId() { return walletId; }
+    public String getUserId() { return userId; }
+    public WalletStatus getStatus() { return status; }
+    public String getCurrency() { return currency; }
+    public Instant getCreatedAt() { return createdAt; }
+
     public boolean isActive() {
         return status == WalletStatus.ACTIVE;
     }

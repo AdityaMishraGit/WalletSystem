@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface FindWalletPort {
     Optional<Wallet> findById(WalletId walletId);
+
+    /** Find wallet by userId (unique). Primary key for transactional APIs. */
+    Optional<Wallet> findByUserId(String userId);
 }

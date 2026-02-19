@@ -19,14 +19,14 @@ public class CashInService {
     private final FindAccountPort findAccountPort;
     private final LedgerPostingEngine ledgerPostingEngine;
 
-    public PostingResult cashIn(WalletId walletId, BigDecimal amount, String referenceId) {
-        log.debug("Cash-in walletId={} amount={} referenceId={}", walletId.value(), amount, referenceId);
-        findWalletPort.findById(walletId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet not found: " + walletId.value()));
+    public PostingResult cashIn(String userId, BigDecimal amount, String referenceId) {
+        log.debug("Cash-in userId={} amount={} referenceId={}", userId, amount, referenceId);
+        var wallet = findWalletPort.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found for userId: " + userId));
         Account settlement = findAccountPort.findSystemAccountByType(AccountType.SETTLEMENT_ACCOUNT)
                 .orElseThrow(() -> new IllegalStateException("Settlement account not found"));
-        Account userAccount = findAccountPort.findByWalletIdAndType(walletId, AccountType.USER_WALLET_ACCOUNT)
-                .orElseThrow(() -> new IllegalArgumentException("User wallet account not found: " + walletId.value()));
+        Account userAccount = findAccountPort.findByWalletIdAndType(wallet.getWalletId(), AccountType.USER_WALLET_ACCOUNT)
+                .orElseThrow(() -> new IllegalArgumentException("User wallet account not found for userId: " + userId));
         PostingCommand cmd = PostingCommand.builder()
                 .transactionId(TransactionId.generate())
                 .transactionType(TransactionType.CASH_IN)
@@ -36,7 +36,7 @@ public class CashInService {
                         PostingLeg.builder().accountId(userAccount.getAccountId()).direction(EntryDirection.CREDIT).amount(amount).build()))
                 .build();
         PostingResult result = ledgerPostingEngine.post(cmd);
-        log.info("Cash-in completed walletId={} txnId={}", walletId.value(), result.getTransaction().getTransactionId().value());
+        log.info("Cash-in completed userId={} txnId={}", userId, result.getTransaction().getTransactionId().value());
         return result;
     }
 }

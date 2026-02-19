@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @Schema(description = "Wallet balance")
 public class BalanceResponse {
 
+    private String userId;
     private String walletId;
     private BigDecimal balance;
 }

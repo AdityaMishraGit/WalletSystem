@@ -17,13 +17,13 @@ import java.math.BigDecimal;
 @Schema(description = "P2P transfer request")
 public class TransferRequest {
 
-    @NotNull(message = "fromWalletId is required")
-    @Schema(description = "Sender wallet UUID", required = true)
-    private String fromWalletId;
+    @NotNull(message = "fromUserId is required")
+    @Schema(description = "Sender user ID (unique per wallet)", required = true)
+    private String fromUserId;
 
-    @NotNull(message = "toWalletId is required")
-    @Schema(description = "Receiver wallet UUID", required = true)
-    private String toWalletId;
+    @NotNull(message = "toUserId is required")
+    @Schema(description = "Receiver user ID (unique per wallet)", required = true)
+    private String toUserId;
 
     @NotNull(message = "amount is required")
     @DecimalMin(value = "0.01", message = "amount must be positive")

@@ -6,7 +6,8 @@ import com.wallet.ledger.domain.entity.Transaction;
 import com.wallet.ledger.domain.entity.Wallet;
 import com.wallet.ledger.domain.valueobject.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -17,12 +18,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WalletAccountPersistenceAdapter implements SaveWalletPort, SaveAccountPort, FindWalletPort, FindAccountPort,
         LockAccountPort, FindTransactionsPort, FindTransactionByReferencePort {
 
+    private static final Logger log = LoggerFactory.getLogger(WalletAccountPersistenceAdapter.class);
     private final JdbcTemplate jdbcTemplate;
 
     private static final RowMapper<Wallet> WALLET_ROW_MAPPER = (rs, rowNum) -> Wallet.builder()
@@ -49,6 +50,8 @@ public class WalletAccountPersistenceAdapter implements SaveWalletPort, SaveAcco
             .status(TransactionStatus.valueOf(rs.getString("status")))
             .referenceId(rs.getString("reference_id"))
             .createdAt(toInstant(rs.getTimestamp("created_at")))
+            .serviceBundleId(rs.getObject("service_bundle_id", UUID.class))
+            .provisioningReference(rs.getString("provisioning_reference"))
             .build();
 
     @Override
@@ -81,6 +84,14 @@ public class WalletAccountPersistenceAdapter implements SaveWalletPort, SaveAcco
     }
 
     @Override
+    public Optional<Wallet> findByUserId(String userId) {
+        List<Wallet> list = jdbcTemplate.query(
+                "SELECT wallet_id, user_id, status, currency, created_at FROM wallet WHERE user_id = ?",
+                WALLET_ROW_MAPPER, userId);
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    }
+
+    @Override
     public Optional<Account> findByWalletIdAndType(WalletId walletId, AccountType accountType) {
         List<Account> list = jdbcTemplate.query(
                 "SELECT account_id, account_type, wallet_id, status FROM account WHERE wallet_id = ? AND account_type = ?",
@@ -108,7 +119,7 @@ public class WalletAccountPersistenceAdapter implements SaveWalletPort, SaveAcco
     @Override
     public List<Transaction> findByAccountId(AccountId accountId) {
         return jdbcTemplate.query("""
-                        SELECT DISTINCT t.txn_id, t.txn_type, t.status, t.reference_id, t.created_at
+                        SELECT DISTINCT t.txn_id, t.txn_type, t.status, t.reference_id, t.created_at, t.service_bundle_id, t.provisioning_reference
                         FROM transaction t INNER JOIN ledger_entry e ON e.txn_id = t.txn_id
                         WHERE e.account_id = ? ORDER BY t.created_at DESC
                         """,
@@ -118,7 +129,7 @@ public class WalletAccountPersistenceAdapter implements SaveWalletPort, SaveAcco
     @Override
     public Optional<Transaction> findByReferenceId(String referenceId) {
         List<Transaction> list = jdbcTemplate.query(
-                "SELECT txn_id, txn_type, status, reference_id, created_at FROM transaction WHERE reference_id = ?",
+                "SELECT txn_id, txn_type, status, reference_id, created_at, service_bundle_id, provisioning_reference FROM transaction WHERE reference_id = ?",
                 TRANSACTION_ROW_MAPPER, referenceId);
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }

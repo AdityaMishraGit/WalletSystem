@@ -10,6 +10,8 @@ public class PostingResult {
 
     Transaction transaction;
 
+    public Transaction getTransaction() { return transaction; }
+
     public static PostingResult of(Transaction transaction) {
         return PostingResult.builder().transaction(transaction).build();
     }

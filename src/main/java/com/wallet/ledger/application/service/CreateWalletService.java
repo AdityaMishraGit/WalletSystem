@@ -21,6 +21,7 @@ public class CreateWalletService {
     /** Default amount credited to a new wallet when it is created. */
     public static final BigDecimal DEFAULT_WALLET_AMOUNT = new BigDecimal("100000");
 
+    private final FindWalletPort findWalletPort;
     private final SaveWalletPort saveWalletPort;
     private final SaveAccountPort saveAccountPort;
     private final FindAccountPort findAccountPort;
@@ -28,6 +29,9 @@ public class CreateWalletService {
 
     @Transactional
     public Wallet createWallet(String userId, String currency) {
+        if (findWalletPort.findByUserId(userId).isPresent()) {
+            throw new IllegalArgumentException("Wallet already exists for userId: " + userId + " (userId is unique)");
+        }
         WalletId walletId = WalletId.generate();
         AccountId accountId = AccountId.generate();
         Wallet wallet = Wallet.builder()

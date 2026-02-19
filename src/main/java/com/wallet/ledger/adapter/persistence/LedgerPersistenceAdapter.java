@@ -5,7 +5,8 @@ import com.wallet.ledger.domain.entity.LedgerEntry;
 import com.wallet.ledger.domain.entity.Transaction;
 import com.wallet.ledger.domain.valueobject.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LedgerPersistenceAdapter implements LoadAccountBalancesPort, PersistPostingPort, FindLedgerEntriesByTransactionIdPort {
 
+    private static final Logger log = LoggerFactory.getLogger(LedgerPersistenceAdapter.class);
     private static final String LATEST_BALANCE_SQL = """
             SELECT balance_after FROM ledger_entry
             WHERE account_id = ?
@@ -59,10 +60,11 @@ public class LedgerPersistenceAdapter implements LoadAccountBalancesPort, Persis
     public void persist(Transaction transaction, List<LedgerEntry> entries) {
         log.trace("Persist txnId={} entries={}", transaction.getTransactionId().value(), entries.size());
         jdbcTemplate.update(
-                "INSERT INTO transaction (txn_id, txn_type, status, reference_id, created_at) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO transaction (txn_id, txn_type, status, reference_id, created_at, service_bundle_id, provisioning_reference) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 transaction.getTransactionId().value(), transaction.getTransactionType().name(),
                 transaction.getStatus().name(), transaction.getReferenceId(),
-                Timestamp.from(transaction.getCreatedAt()));
+                Timestamp.from(transaction.getCreatedAt()),
+                transaction.getServiceBundleId(), transaction.getProvisioningReference());
         String insertEntry = "INSERT INTO ledger_entry (entry_id, txn_id, account_id, direction, amount, balance_after, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
         for (LedgerEntry entry : entries) {
             jdbcTemplate.update(insertEntry,

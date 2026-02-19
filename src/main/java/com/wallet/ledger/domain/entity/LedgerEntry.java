@@ -25,6 +25,14 @@ public class LedgerEntry {
     BigDecimal balanceAfter;
     Instant createdAt;
 
+    public EntryId getEntryId() { return entryId; }
+    public TransactionId getTransactionId() { return transactionId; }
+    public AccountId getAccountId() { return accountId; }
+    public EntryDirection getDirection() { return direction; }
+    public BigDecimal getAmount() { return amount; }
+    public BigDecimal getBalanceAfter() { return balanceAfter; }
+    public Instant getCreatedAt() { return createdAt; }
+
     public boolean isDebit() {
         return direction == EntryDirection.DEBIT;
     }

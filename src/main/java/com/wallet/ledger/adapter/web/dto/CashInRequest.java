@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 @Schema(description = "Cash-in request")
 public class CashInRequest {
 
-    @NotNull(message = "walletId is required")
-    @Schema(description = "Target wallet UUID", required = true)
-    private String walletId;
+    @NotNull(message = "userId is required")
+    @Schema(description = "User ID (unique per wallet); primary key for transactional APIs", required = true)
+    private String userId;
 
     @NotNull(message = "amount is required")
     @DecimalMin(value = "0.01", message = "amount must be positive")

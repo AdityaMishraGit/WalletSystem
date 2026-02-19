@@ -16,16 +16,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CashOutService {
 
+    private final FindWalletPort findWalletPort;
     private final FindAccountPort findAccountPort;
     private final LockAccountPort lockAccountPort;
     private final LedgerPostingEngine ledgerPostingEngine;
 
     /** Step 1: DEBIT user_wallet, CREDIT withdrawal_pending */
     @Transactional
-    public PostingResult reserveWithdrawal(WalletId walletId, BigDecimal amount, String referenceId) {
-        log.debug("Reserve withdrawal walletId={} amount={} referenceId={}", walletId.value(), amount, referenceId);
-        Account userAccount = findAccountPort.findByWalletIdAndType(walletId, AccountType.USER_WALLET_ACCOUNT)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet account not found: " + walletId.value()));
+    public PostingResult reserveWithdrawal(String userId, BigDecimal amount, String referenceId) {
+        log.debug("Reserve withdrawal userId={} amount={} referenceId={}", userId, amount, referenceId);
+        var wallet = findWalletPort.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not found for userId: " + userId));
+        Account userAccount = findAccountPort.findByWalletIdAndType(wallet.getWalletId(), AccountType.USER_WALLET_ACCOUNT)
+                .orElseThrow(() -> new IllegalArgumentException("Wallet account not found for userId: " + userId));
         Account pendingAccount = findAccountPort.findSystemAccountByType(AccountType.WITHDRAWAL_PENDING_ACCOUNT)
                 .orElseThrow(() -> new IllegalStateException("Withdrawal pending account not found"));
         lockAccountPort.lockForUpdate(userAccount.getAccountId())
@@ -39,7 +42,7 @@ public class CashOutService {
                         PostingLeg.builder().accountId(pendingAccount.getAccountId()).direction(EntryDirection.CREDIT).amount(amount).build()))
                 .build();
         PostingResult result = ledgerPostingEngine.post(cmd);
-        log.info("Withdrawal reserved walletId={} txnId={}", walletId.value(), result.getTransaction().getTransactionId().value());
+        log.info("Withdrawal reserved userId={} txnId={}", userId, result.getTransaction().getTransactionId().value());
         return result;
     }
 
