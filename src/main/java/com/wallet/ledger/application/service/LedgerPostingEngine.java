@@ -8,6 +8,7 @@ import com.wallet.ledger.domain.exception.InvalidPostingException;
 import com.wallet.ledger.domain.valueobject.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,9 @@ import java.util.stream.Collectors;
 public class LedgerPostingEngine {
 
     private static final int AMOUNT_SCALE = 4;
+
+    @Value("${ledger.system-accounts.master}")
+    private String systemMasterAccountIdValue;
 
     private final LoadAccountBalancesPort loadAccountBalancesPort;
     private final PersistPostingPort persistPostingPort;
@@ -59,7 +63,8 @@ public class LedgerPostingEngine {
             BigDecimal balanceAfter = leg.getDirection() == EntryDirection.DEBIT
                     ? currentBalance.subtract(amount)
                     : currentBalance.add(amount);
-            if (balanceAfter.compareTo(BigDecimal.ZERO) < 0) {
+            boolean allowedNegative = leg.getAccountId().value().toString().equals(systemMasterAccountIdValue);
+            if (balanceAfter.compareTo(BigDecimal.ZERO) < 0 && !allowedNegative) {
                 throw new InsufficientBalanceException(
                         "Insufficient balance for account " + leg.getAccountId().value() + ": current=" + currentBalance + ", debit=" + amount);
             }

@@ -1,7 +1,8 @@
 -- Wallet Ledger - Double-entry schema
 -- Balance is NEVER stored; derived from ledger_entry.balance_after
+-- Idempotent: safe to run when objects already exist (e.g. after a failed run).
 
-CREATE TABLE wallet (
+CREATE TABLE IF NOT EXISTS wallet (
     wallet_id   UUID         NOT NULL PRIMARY KEY,
     user_id     VARCHAR(255) NOT NULL,
     status      VARCHAR(32)  NOT NULL,
@@ -10,10 +11,10 @@ CREATE TABLE wallet (
     CONSTRAINT chk_wallet_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'CLOSED'))
 );
 
-CREATE INDEX idx_wallet_user_id ON wallet (user_id);
-CREATE INDEX idx_wallet_status ON wallet (status);
+CREATE INDEX IF NOT EXISTS idx_wallet_user_id ON wallet (user_id);
+CREATE INDEX IF NOT EXISTS idx_wallet_status ON wallet (status);
 
-CREATE TABLE account (
+CREATE TABLE IF NOT EXISTS account (
     account_id   UUID         NOT NULL PRIMARY KEY,
     account_type VARCHAR(64)  NOT NULL,
     wallet_id    UUID         NULL,
@@ -25,14 +26,18 @@ CREATE TABLE account (
     CONSTRAINT chk_account_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'CLOSED'))
 );
 
-CREATE INDEX idx_account_wallet_id ON account (wallet_id);
-CREATE INDEX idx_account_type ON account (account_type);
-CREATE UNIQUE INDEX idx_account_wallet_type ON account (wallet_id, account_type) WHERE wallet_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_account_wallet_id ON account (wallet_id);
+CREATE INDEX IF NOT EXISTS idx_account_type ON account (account_type);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_account_wallet_type ON account (wallet_id, account_type) WHERE wallet_id IS NOT NULL;
 
-ALTER TABLE account
-    ADD CONSTRAINT fk_account_wallet FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_account_wallet') THEN
+        ALTER TABLE account ADD CONSTRAINT fk_account_wallet FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id);
+    END IF;
+END $$;
 
-CREATE TABLE transaction (
+CREATE TABLE IF NOT EXISTS transaction (
     txn_id       UUID         NOT NULL PRIMARY KEY,
     txn_type     VARCHAR(32)  NOT NULL,
     status       VARCHAR(32)  NOT NULL,
@@ -44,11 +49,11 @@ CREATE TABLE transaction (
     CONSTRAINT chk_txn_status CHECK (status IN ('PENDING', 'COMPLETED', 'FAILED', 'REVERSED'))
 );
 
-CREATE UNIQUE INDEX idx_transaction_reference_id ON transaction (reference_id);
-CREATE INDEX idx_transaction_created_at ON transaction (created_at);
-CREATE INDEX idx_transaction_type ON transaction (txn_type);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_transaction_reference_id ON transaction (reference_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_created_at ON transaction (created_at);
+CREATE INDEX IF NOT EXISTS idx_transaction_type ON transaction (txn_type);
 
-CREATE TABLE ledger_entry (
+CREATE TABLE IF NOT EXISTS ledger_entry (
     entry_id      UUID          NOT NULL PRIMARY KEY,
     txn_id        UUID          NOT NULL,
     account_id    UUID          NOT NULL,
@@ -62,8 +67,8 @@ CREATE TABLE ledger_entry (
     CONSTRAINT fk_ledger_account FOREIGN KEY (account_id) REFERENCES account (account_id)
 );
 
-CREATE INDEX idx_ledger_entry_txn_id ON ledger_entry (txn_id);
-CREATE INDEX idx_ledger_entry_account_id ON ledger_entry (account_id);
-CREATE INDEX idx_ledger_entry_account_created ON ledger_entry (account_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ledger_entry_txn_id ON ledger_entry (txn_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_entry_account_id ON ledger_entry (account_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_entry_account_created ON ledger_entry (account_id, created_at DESC);
 
 COMMENT ON TABLE ledger_entry IS 'Immutable double-entry postings. Balance = latest balance_after per account.';
