@@ -1,0 +1,95 @@
+{
+  "info": {
+    "name": "Provisioning Transactions (100 per user × 50 users)",
+    "description": "Runs 5000 provisioning transactions: 100 per user (usr_01–usr_50), spread across different provisioning services/bundles. Prerequisites: (1) Onboard 50 Users collection run, (2) Provisioning Services & Bundles collection run, (3) users have wallet balance (e.g. cash-in). Run folder 1 once to load bundle IDs, then run folder 2 with 5000 iterations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "bundleIds", "value": "[]" }
+  ],
+  "item": [
+    {
+      "name": "1. Setup - Get bundle IDs (run once)",
+      "item": [
+        {
+          "name": "List bundles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const bundles = pm.response.json();",
+                  "  const ids = Array.isArray(bundles) ? bundles.map(function(b) { return b.id; }) : [];",
+                  "  pm.collectionVariables.set('bundleIds', JSON.stringify(ids));",
+                  "  console.log('Saved ' + ids.length + ' bundle IDs');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Execute provisioning (100 per user × 50 users)",
+      "item": [
+        {
+          "name": "Execute provisioning",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var iter = pm.info.iteration;",
+                  "var userNum = (iter % 50) + 1;",
+                  "var userId = userNum < 10 ? 'usr_0' + userNum : 'usr_' + userNum;",
+                  "var bundleIdsJson = pm.collectionVariables.get('bundleIds') || '[]';",
+                  "var bundleIds = [];",
+                  "try { bundleIds = JSON.parse(bundleIdsJson); } catch (e) {}",
+                  "var bundleId = bundleIds.length > 0 ? bundleIds[Math.floor(Math.random() * bundleIds.length)] : '';",
+                  "var ref = 'ref_' + iter + '_' + Date.now();",
+                  "pm.variables.set('userId', userId);",
+                  "pm.variables.set('bundleId', bundleId);",
+                  "pm.variables.set('provisioningReference', ref);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.variables.get('bundleId') === '') {",
+                  "  pm.test('Setup required', function() { pm.expect.fail('Run folder 1 (List bundles) once first.'); });",
+                  "} else if (pm.response.code === 200) {",
+                  "  pm.test('Provisioning succeeded', function() { pm.response.to.have.status(200); });",
+                  "} else if (pm.response.code === 422) {",
+                  "  pm.test('Insufficient balance or business rule', function() { console.log('422: ' + pm.response.json().error); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"bundleId\": \"{{bundleId}}\",\n  \"provisioningReference\": \"{{provisioningReference}}\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning/execute"
+          }
+        }
+      ]
+    }
+  ]
+}

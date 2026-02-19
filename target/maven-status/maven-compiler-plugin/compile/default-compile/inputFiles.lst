@@ -19,6 +19,7 @@
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/ServiceBundleResponse.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/SystemAccountBalanceResponse.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/SystemAccountCreditRequest.java
+/Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/TransactionHistoryItemResponse.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/TransactionResponse.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/TransferRequest.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/adapter/web/dto/UpdateProvisioningServiceRequest.java
@@ -50,6 +51,7 @@
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/application/service/ReversalService.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/application/service/SystemAccountService.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/application/service/TransactionHistoryService.java
+/Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/application/service/TransactionWithEntryDetail.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/application/service/TransferService.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/domain/entity/Account.java
 /Users/a23135320/WalletSystem/src/main/java/com/wallet/ledger/domain/entity/LedgerEntry.java

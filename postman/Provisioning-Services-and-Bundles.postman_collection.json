@@ -1,0 +1,400 @@
+{
+  "info": {
+    "name": "Provisioning Services & Bundles (10–20 datasets)",
+    "description": "Creates multiple provisioning services and 10–20 bundles for TV recharge, prepaid, subscriptions, data, and utility. Run in order: services first (IDs are saved), then bundles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "serviceId_dstv", "value": "" },
+    { "key": "serviceId_airtel", "value": "" },
+    { "key": "serviceId_netflix", "value": "" },
+    { "key": "serviceId_dataco", "value": "" },
+    { "key": "serviceId_utility", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Create Provisioning Services",
+      "item": [
+        {
+          "name": "Create Service - DSTv (TV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const id = pm.response.json().id;",
+                  "  pm.collectionVariables.set('serviceId_dstv', id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TV_RECHARGE\",\n  \"name\": \"DSTv\",\n  \"code\": \"DSTV\",\n  \"subcategory\": \"entertainment\",\n  \"description\": \"DSTv satellite TV\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        },
+        {
+          "name": "Create Service - Airtel Prepaid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('serviceId_airtel', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PREPAID_RECHARGE\",\n  \"name\": \"Airtel Prepaid\",\n  \"code\": \"AIRTEL_PREPAID\",\n  \"subcategory\": \"mobile\",\n  \"description\": \"Airtel prepaid recharge\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        },
+        {
+          "name": "Create Service - Netflix",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('serviceId_netflix', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SUBSCRIPTION\",\n  \"name\": \"Netflix\",\n  \"code\": \"NETFLIX\",\n  \"subcategory\": \"streaming\",\n  \"description\": \"Netflix subscription\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        },
+        {
+          "name": "Create Service - DataCo (Data bundles)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('serviceId_dataco', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"DATA_BUNDLE\",\n  \"name\": \"DataCo\",\n  \"code\": \"DATACO\",\n  \"subcategory\": \"data\",\n  \"description\": \"Mobile data bundles\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        },
+        {
+          "name": "Create Service - UtilityCo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('serviceId_utility', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"UTILITY_BILL\",\n  \"name\": \"UtilityCo\",\n  \"code\": \"UTILITYCO\",\n  \"subcategory\": \"electricity\",\n  \"description\": \"Electricity and water bills\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create Bundles (10–20)",
+      "item": [
+        {
+          "name": "Bundle - DSTv Compact",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dstv}}\",\n  \"name\": \"DSTv Compact\",\n  \"code\": \"DSTV-COMPACT\",\n  \"fixedAmount\": 50.00,\n  \"subcategory\": \"entertainment\",\n  \"validityDays\": 30,\n  \"description\": \"Compact package 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DSTv Compact Plus",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dstv}}\",\n  \"name\": \"DSTv Compact Plus\",\n  \"code\": \"DSTV-COMPACT-PLUS\",\n  \"fixedAmount\": 75.00,\n  \"subcategory\": \"entertainment\",\n  \"validityDays\": 30,\n  \"description\": \"Compact Plus 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DSTv Premium",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dstv}}\",\n  \"name\": \"DSTv Premium\",\n  \"code\": \"DSTV-PREMIUM\",\n  \"fixedAmount\": 120.00,\n  \"subcategory\": \"entertainment\",\n  \"validityDays\": 30,\n  \"description\": \"Premium package 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Airtel 10",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_airtel}}\",\n  \"name\": \"Airtel 10\",\n  \"code\": \"AIRTEL-10\",\n  \"fixedAmount\": 10.00,\n  \"subcategory\": \"mobile\",\n  \"validityDays\": 30,\n  \"description\": \"10 currency recharge\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Airtel 25",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_airtel}}\",\n  \"name\": \"Airtel 25\",\n  \"code\": \"AIRTEL-25\",\n  \"fixedAmount\": 25.00,\n  \"subcategory\": \"mobile\",\n  \"validityDays\": 30,\n  \"description\": \"25 currency recharge\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Airtel 50",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_airtel}}\",\n  \"name\": \"Airtel 50\",\n  \"code\": \"AIRTEL-50\",\n  \"fixedAmount\": 50.00,\n  \"subcategory\": \"mobile\",\n  \"validityDays\": 30,\n  \"description\": \"50 currency recharge\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Netflix Basic",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_netflix}}\",\n  \"name\": \"Netflix Basic\",\n  \"code\": \"NETFLIX-BASIC\",\n  \"fixedAmount\": 9.99,\n  \"subcategory\": \"streaming\",\n  \"validityDays\": 30,\n  \"description\": \"Basic monthly\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Netflix Standard",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_netflix}}\",\n  \"name\": \"Netflix Standard\",\n  \"code\": \"NETFLIX-STANDARD\",\n  \"fixedAmount\": 15.99,\n  \"subcategory\": \"streaming\",\n  \"validityDays\": 30,\n  \"description\": \"Standard monthly HD\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Netflix Premium",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_netflix}}\",\n  \"name\": \"Netflix Premium\",\n  \"code\": \"NETFLIX-PREMIUM\",\n  \"fixedAmount\": 19.99,\n  \"subcategory\": \"streaming\",\n  \"validityDays\": 30,\n  \"description\": \"Premium 4K\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DataCo 1GB",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dataco}}\",\n  \"name\": \"DataCo 1GB\",\n  \"code\": \"DATACO-1GB\",\n  \"fixedAmount\": 5.00,\n  \"subcategory\": \"data\",\n  \"validityDays\": 7,\n  \"description\": \"1GB 7 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DataCo 5GB",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dataco}}\",\n  \"name\": \"DataCo 5GB\",\n  \"code\": \"DATACO-5GB\",\n  \"fixedAmount\": 15.00,\n  \"subcategory\": \"data\",\n  \"validityDays\": 30,\n  \"description\": \"5GB 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DataCo 10GB",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dataco}}\",\n  \"name\": \"DataCo 10GB\",\n  \"code\": \"DATACO-10GB\",\n  \"fixedAmount\": 25.00,\n  \"subcategory\": \"data\",\n  \"validityDays\": 30,\n  \"description\": \"10GB 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DataCo 20GB",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dataco}}\",\n  \"name\": \"DataCo 20GB\",\n  \"code\": \"DATACO-20GB\",\n  \"fixedAmount\": 40.00,\n  \"subcategory\": \"data\",\n  \"validityDays\": 30,\n  \"description\": \"20GB 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - UtilityCo Electricity 50",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_utility}}\",\n  \"name\": \"Electricity 50\",\n  \"code\": \"UTILITY-ELEC-50\",\n  \"fixedAmount\": 50.00,\n  \"subcategory\": \"electricity\",\n  \"validityDays\": null,\n  \"description\": \"Electricity token 50\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - UtilityCo Electricity 100",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_utility}}\",\n  \"name\": \"Electricity 100\",\n  \"code\": \"UTILITY-ELEC-100\",\n  \"fixedAmount\": 100.00,\n  \"subcategory\": \"electricity\",\n  \"validityDays\": null,\n  \"description\": \"Electricity token 100\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - UtilityCo Water 30",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_utility}}\",\n  \"name\": \"Water 30\",\n  \"code\": \"UTILITY-WATER-30\",\n  \"fixedAmount\": 30.00,\n  \"subcategory\": \"water\",\n  \"validityDays\": null,\n  \"description\": \"Water bill 30\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DSTv Family",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dstv}}\",\n  \"name\": \"DSTv Family\",\n  \"code\": \"DSTV-FAMILY\",\n  \"fixedAmount\": 95.00,\n  \"subcategory\": \"entertainment\",\n  \"validityDays\": 30,\n  \"description\": \"Family package 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - Airtel 100",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_airtel}}\",\n  \"name\": \"Airtel 100\",\n  \"code\": \"AIRTEL-100\",\n  \"fixedAmount\": 100.00,\n  \"subcategory\": \"mobile\",\n  \"validityDays\": 30,\n  \"description\": \"100 currency recharge\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        },
+        {
+          "name": "Bundle - DataCo 50GB",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provisioningServiceId\": \"{{serviceId_dataco}}\",\n  \"name\": \"DataCo 50GB\",\n  \"code\": \"DATACO-50GB\",\n  \"fixedAmount\": 80.00,\n  \"subcategory\": \"data\",\n  \"validityDays\": 30,\n  \"description\": \"50GB 30 days\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. List (verify)",
+      "item": [
+        {
+          "name": "List all provisioning services",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/provisioning-services"
+          }
+        },
+        {
+          "name": "List all bundles",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/provisioning-services/bundles"
+          }
+        }
+      ]
+    }
+  ]
+}

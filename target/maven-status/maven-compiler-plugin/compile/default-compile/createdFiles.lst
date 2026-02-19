@@ -15,6 +15,7 @@ com/wallet/ledger/domain/valueobject/AccountStatus.class
 com/wallet/ledger/application/port/FindServiceBundlesPort.class
 com/wallet/ledger/domain/entity/Transaction$TransactionBuilder.class
 com/wallet/ledger/adapter/web/dto/SystemAccountBalanceResponse$SystemAccountBalanceResponseBuilder.class
+com/wallet/ledger/adapter/web/dto/TransactionHistoryItemResponse.class
 com/wallet/ledger/adapter/web/dto/TransactionResponse$Builder.class
 com/wallet/ledger/application/port/FindWalletPort.class
 com/wallet/ledger/application/port/PostingResult.class
@@ -28,12 +29,14 @@ com/wallet/ledger/adapter/web/dto/ServiceBundleResponse$Builder.class
 com/wallet/ledger/domain/valueobject/ProvisioningServiceType.class
 com/wallet/ledger/domain/entity/Account.class
 com/wallet/ledger/application/service/TransferService.class
+com/wallet/ledger/adapter/web/dto/TransactionHistoryItemResponse$TransactionHistoryItemResponseBuilder.class
 com/wallet/ledger/application/service/CashInService.class
 com/wallet/ledger/WalletLedgerApplication.class
 com/wallet/ledger/adapter/web/dto/CreateProvisioningServiceRequest.class
 com/wallet/ledger/domain/exception/DomainException.class
 com/wallet/ledger/adapter/web/dto/CreateServiceBundleRequest.class
 com/wallet/ledger/domain/entity/ProvisioningService$ProvisioningServiceBuilder.class
+com/wallet/ledger/application/service/TransactionWithEntryDetail.class
 com/wallet/ledger/domain/entity/Account$AccountBuilder.class
 com/wallet/ledger/adapter/web/dto/ProvisioningServiceResponse.class
 com/wallet/ledger/application/service/CashOutService.class
@@ -41,6 +44,7 @@ com/wallet/ledger/domain/valueobject/AmountFilter.class
 com/wallet/ledger/adapter/web/dto/SystemAccountBalanceResponse.class
 com/wallet/ledger/domain/valueobject/EntryId.class
 com/wallet/ledger/adapter/web/dto/UpdateProvisioningServiceRequest$UpdateProvisioningServiceRequestBuilder.class
+com/wallet/ledger/adapter/web/dto/TransactionHistoryItemResponse$Builder.class
 com/wallet/ledger/adapter/web/dto/TransferRequest$TransferRequestBuilder.class
 com/wallet/ledger/application/service/SystemAccountService.class
 com/wallet/ledger/adapter/web/dto/TransactionResponse.class
