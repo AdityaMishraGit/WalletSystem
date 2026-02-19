@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: wallet-ledger
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/walletledger
+    username: postgres
+    password: 23135320
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/walletledger
+    user: postgres
+    password: 23135320
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8085
+
+ledger:
+  system-accounts:
+    master: 00000000-0000-0000-0000-000000000001
+    settlement: 00000000-0000-0000-0000-000000000002
+    withdrawal-pending: 00000000-0000-0000-0000-000000000003
+    fee: 00000000-0000-0000-0000-000000000004
+    reversal: 00000000-0000-0000-0000-000000000005
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.wallet: DEBUG
+    org.springframework.jdbc: DEBUG
