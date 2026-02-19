@@ -167,6 +167,38 @@ Transaction with `transactionType`: `REVERSAL`. **400** – Original transaction
 
 ---
 
+## 8. System accounts (balance and credit)
+
+System accounts (SETTLEMENT_ACCOUNT, WITHDRAWAL_PENDING_ACCOUNT, FEE_ACCOUNT, REVERSAL_ACCOUNT, SYSTEM_MASTER_ACCOUNT) are seeded with an initial balance of 1,000,000,000 each (except SYSTEM_MASTER_ACCOUNT which nets to 0). You can check their balances and add more funds via these endpoints.
+
+### List all system account balances
+
+**GET** `/system-accounts/balance`
+
+Returns balance for each system account.
+
+**Response 200 OK:** Array of `{ "accountType": "string", "accountId": "uuid", "balance": "decimal" }`.
+
+### Get one system account balance
+
+**GET** `/system-accounts/balance/{accountType}`
+
+**Path:** `accountType` = `SYSTEM_MASTER_ACCOUNT` | `SETTLEMENT_ACCOUNT` | `WITHDRAWAL_PENDING_ACCOUNT` | `FEE_ACCOUNT` | `REVERSAL_ACCOUNT`.
+
+**Response 200 OK:** `{ "accountType": "string", "accountId": "uuid", "balance": "decimal" }`.
+
+### Add amount to a system account
+
+**POST** `/system-accounts/credit`
+
+Credits the given system account (double-entry: DEBIT SYSTEM_MASTER_ACCOUNT, CREDIT target). Use for SETTLEMENT_ACCOUNT, WITHDRAWAL_PENDING_ACCOUNT, FEE_ACCOUNT, or REVERSAL_ACCOUNT (not SYSTEM_MASTER_ACCOUNT).
+
+**Body:** `{ "accountType": "SETTLEMENT_ACCOUNT", "amount": 500.00 }`
+
+**Response 200 OK:** Transaction object (`transactionType`: `SYSTEM_CREDIT`).
+
+---
+
 ## Error responses
 
 | Status | Meaning                |

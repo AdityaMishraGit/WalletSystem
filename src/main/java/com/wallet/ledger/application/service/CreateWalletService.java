@@ -1,7 +1,6 @@
 package com.wallet.ledger.application.service;
 
-import com.wallet.ledger.application.port.SaveAccountPort;
-import com.wallet.ledger.application.port.SaveWalletPort;
+import com.wallet.ledger.application.port.*;
 import com.wallet.ledger.domain.entity.Account;
 import com.wallet.ledger.domain.entity.Wallet;
 import com.wallet.ledger.domain.valueobject.*;
@@ -10,15 +9,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateWalletService {
 
+    /** Default amount credited to a new wallet when it is created. */
+    public static final BigDecimal DEFAULT_WALLET_AMOUNT = new BigDecimal("100000");
+
     private final SaveWalletPort saveWalletPort;
     private final SaveAccountPort saveAccountPort;
+    private final FindAccountPort findAccountPort;
+    private final LedgerPostingEngine ledgerPostingEngine;
 
     @Transactional
     public Wallet createWallet(String userId, String currency) {
@@ -39,7 +45,22 @@ public class CreateWalletService {
                 .build();
         saveWalletPort.save(wallet);
         saveAccountPort.save(account);
-        log.info("Created wallet walletId={} userId={}", wallet.getWalletId().value(), wallet.getUserId());
+
+        // Credit new wallet with default amount (DEBIT settlement, CREDIT user_wallet)
+        Account settlement = findAccountPort.findSystemAccountByType(AccountType.SETTLEMENT_ACCOUNT)
+                .orElseThrow(() -> new IllegalStateException("Settlement account not found"));
+        String ref = "wallet-creation-" + walletId.value();
+        PostingCommand cmd = PostingCommand.builder()
+                .transactionId(TransactionId.generate())
+                .transactionType(TransactionType.CASH_IN)
+                .referenceId(ref)
+                .legs(List.of(
+                        PostingLeg.builder().accountId(settlement.getAccountId()).direction(EntryDirection.DEBIT).amount(DEFAULT_WALLET_AMOUNT).build(),
+                        PostingLeg.builder().accountId(account.getAccountId()).direction(EntryDirection.CREDIT).amount(DEFAULT_WALLET_AMOUNT).build()))
+                .build();
+        ledgerPostingEngine.post(cmd);
+
+        log.info("Created wallet walletId={} userId={} with default balance {}", wallet.getWalletId().value(), wallet.getUserId(), DEFAULT_WALLET_AMOUNT);
         return wallet;
     }
 }
